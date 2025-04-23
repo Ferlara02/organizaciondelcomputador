@@ -1,131 +1,102 @@
 `timescale 1ns / 1ps
 
-module alu_tb;
-
-    // Testbench signals to drive DUT inputs
-    logic       tb_a_in_0;
-    logic       tb_a_in_1;
-    logic       tb_a_in_2;
-    logic       tb_a_in_3;
-    logic       tb_b_in_0;
-    logic       tb_b_in_1;
-    logic       tb_b_in_2;
-    logic       tb_b_in_3;
-    logic       tb_alu_op_0;
-    logic       tb_alu_op_1;
-    logic       tb_alu_op_2;
-
-    // Testbench signals (wires) to observe DUT outputs
-    wire        tb_alu_result_0;
-    wire        tb_alu_result_1;
-    wire        tb_alu_result_2;
-    wire        tb_alu_result_3;
-    wire        tb_zero_flag;
-    wire        tb_carry_flag;
-
-    // Group signals for easier assignment and display in TB
-    logic [3:0] tb_a_in;
-    logic [3:0] tb_b_in;
-    logic [2:0] tb_alu_op;
-    wire  [3:0] tb_alu_result;
-
-    // Assign individual bits from grouped TB signals to DUT ports
-    assign {tb_a_in_3, tb_a_in_2, tb_a_in_1, tb_a_in_0} = tb_a_in;
-    assign {tb_b_in_3, tb_b_in_2, tb_b_in_1, tb_b_in_0} = tb_b_in;
-    assign {tb_alu_op_2, tb_alu_op_1, tb_alu_op_0} = tb_alu_op;
-
-    // Group DUT outputs for easier display
-    assign tb_alu_result = {tb_alu_result_3, tb_alu_result_2, tb_alu_result_1, tb_alu_result_0};
-
-    // Instantiate the Device Under Test (DUT)
-    alu dut (
-        // Inputs
-        .a_in_0     (tb_a_in_0),
-        .a_in_1     (tb_a_in_1),
-        .a_in_2     (tb_a_in_2),
-        .a_in_3     (tb_a_in_3),
-
-        .b_in_0     (tb_b_in_0),
-        .b_in_1     (tb_b_in_1),
-        .b_in_2     (tb_b_in_2),
-        .b_in_3     (tb_b_in_3),
-
-        .alu_op_0   (tb_alu_op_0),
-        .alu_op_1   (tb_alu_op_1),
-        .alu_op_2   (tb_alu_op_2),
-
-        // Outputs
-        .alu_result_0 (tb_alu_result_0),
-        .alu_result_1 (tb_alu_result_1),
-        .alu_result_2 (tb_alu_result_2),
-        .alu_result_3 (tb_alu_result_3),
-        .zero_flag    (tb_zero_flag),
-        .carry_flag   (tb_carry_flag)
+module alu(
+    input a_in_0,
+    input a_in_1,
+    input a_in_2,
+    input a_in_3,
+    input b_in_0,
+    input b_in_1,
+    input b_in_2,
+    input b_in_3,
+    input alu_op_0,
+    input alu_op_1,
+    input alu_op_2,
+    output alu_result_0,
+    output alu_result_1,
+    output alu_result_2,
+    output alu_result_3,
+    output zero_flag,
+    output carry_flag
     );
+       
+    //------------------------- AND (000) -------------------------
+    logic and0, and1, and2, and3;
+    and_gate u_and_0 (.a(a_in_0), .b(b_in_0), .y(and0));
+    and_gate u_and_1 (.a(a_in_1), .b(b_in_1), .y(and1));
+    and_gate u_and_2 (.a(a_in_2), .b(b_in_2), .y(and2));
+    and_gate u_and_3 (.a(a_in_3), .b(b_in_3), .y(and3));
 
-    // Stimulus and Checking Process
-    initial begin
-        $display("               Starting ALU Testbench...");
-        $display("               Time   A      B      Op | Result Z C");
-        $display("-------------------------------------------------------");
 
-        // Initialize
-        tb_a_in   = 4'b0000;
-        tb_b_in   = 4'b0000;
-        tb_alu_op = 3'b000; // AND operation
-        #10; // Wait for signals to settle
 
-        // Test Case 1: AND (0101 & 0011 = 0001) Op = 000
-        tb_a_in   = 4'b0101;
-        tb_b_in   = 4'b0011;
-        tb_alu_op = 3'b000;
-        #10; $display("%3t: %4b & %4b (000)| %4b   %b %b", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
+    //------------------------- OR  (001) -------------------------
+    logic or0, or1, or2, or3;
+    
+    or_gate u_or_0 (.a(a_in_0), .b(b_in_0), .y(or0));
+    or_gate u_or_1 (.a(a_in_1), .b(b_in_1), .y(or1));
+    or_gate u_or_2 (.a(a_in_2), .b(b_in_2), .y(or2));
+    or_gate u_or_3 (.a(a_in_3), .b(b_in_3), .y(or3));
 
-        // Test Case 2: OR (0101 | 0011 = 0111) Op = 001
-        tb_a_in   = 4'b0101;
-        tb_b_in   = 4'b0011;
-        tb_alu_op = 3'b001;
-        #10; $display("%3t: %4b | %4b (001)| %4b   %b %b", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
 
-        // Test Case 3: ADD (0101 + 0011 = 1000) Op = 010 (5 + 3 = 8)
-        tb_a_in   = 4'b0101;
-        tb_b_in   = 4'b0011;
-        tb_alu_op = 3'b010;
-        #10; $display("%3t: %4b + %4b (010)| %4b   %b %b", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
+    //------------------------- ADD (010) -------------------------
+    logic add_0, carry_out_0, add_1, carry_out_1, add_2, carry_out_2, add_3, carry_out_3;
+    logic cero = 1'b0;
+    
+    adder_1bit u_adder_0 (.a(a_in_0), .b(b_in_0), .carry_in(cero), .add(add_0), .carry_out(carry_out_0));
+    adder_1bit u_adder_1 (.a(a_in_1), .b(b_in_1), .carry_in(carry_out_0), .add(add_1), .carry_out(carry_out_1));
+    adder_1bit u_adder_2 (.a(a_in_2), .b(b_in_2), .carry_in(carry_out_1), .add(add_2), .carry_out(carry_out_2));
+    adder_1bit u_adder_3 (.a(a_in_3), .b(b_in_3), .carry_in(carry_out_2), .add(add_3), .carry_out(carry_out_3));
 
-        // Test Case 4: ADD with Carry (1001 + 1001 = (1)0010) Op = 010 (9 + 9 = 18)
-        tb_a_in   = 4'b1001;
-        tb_b_in   = 4'b1001;
-        tb_alu_op = 3'b010;
-        #10; $display("%3t: %4b + %4b (010)| %4b   %b %b", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
-        
-        // Test Case 5: SUB 1011(0xB) - 0001(0x1) = 1010 (0xA) Op = 110 (0xB - 0X1 = 0xA)
-        tb_a_in   = 4'b1011;
-        tb_b_in   = 4'b0001;
-        tb_alu_op = 3'b110;
-        #10; $display("%3t: %4b - %4b (110)| %4b   %b %b", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
-        
-        // Test Case 6: Zero Flag Test (AND 1010 & 0101 = 0000) Op = 000
-        tb_a_in   = 4'b1010;
-        tb_b_in   = 4'b0101;
-        tb_alu_op = 3'b000;
-        #10; $display("%3t: %4b & %4b (000)| %4b   %b %b <-- Expect Z=1", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
+    
 
-        // Test Case 7: Pass B (A=xxxx, B=1011) Op = 111 --> Should output B
-        // NOTE: Assumes MUX d7 connects to b_in_x, not the undefined in_b_x
-        tb_a_in   = 4'b0101; // A shouldn't matter for this op
-        tb_b_in   = 4'b1011;
-        tb_alu_op = 3'b111;
-        #10; $display("%3t: Pass B=%4b (111)| %4b   %b %b", $time, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
+    //------------------------- SUB (110) -------------------------
 
-        // Test Case 8: Undefined Op (e.g., 011) -> Should output 0000 based on MUX d3-d6
-        tb_a_in   = 4'b1111;
-        tb_b_in   = 4'b1111;
-        tb_alu_op = 3'b011;
-        #10; $display("%3t: Undef Op=%4b (011)| %4b   %b %b <-- Expect 0000, Z=1", $time, tb_a_in, tb_b_in, tb_alu_result, tb_zero_flag, tb_carry_flag);
+    logic not_b_in_0, not_b_in_1, not_b_in_2, not_b_in_3;
+    logic add_res_0, add_res_1, add_res_2, add_res_3, carry_out_res_0, carry_out_res_1, carry_out_res_2;
+    logic uno = 1'b1;
+    logic carry_out_d6, carry_out_res_10, carry_out_res_11, carry_out_res_12, add_res_10, add_res_11, add_res_12, add_res_13;
 
-        $display("-------------------------------------------------------");
-        $display("Testbench Finished.");
-        $finish; // End the simulation
-    end
+    not_gate b_not_0 (.a(b_in_0), .y(not_b_in_0));
+    not_gate b_not_1 (.a(b_in_1), .y(not_b_in_1));
+    not_gate b_not_2 (.a(b_in_2), .y(not_b_in_2));
+    not_gate b_not_3 (.a(b_in_3), .y(not_b_in_3));
+
+    adder_1bit res_b_0 (.a(not_b_in_0), .b(uno), .carry_in(cero), .add(add_res_0), .carry_out(carry_out_res_0));
+    adder_1bit res_b_1 (.a(not_b_in_1), .b(cero), .carry_in(carry_out_res_0), .add(add_res_1), .carry_out(carry_out_res_1));
+    adder_1bit res_b_2 (.a(not_b_in_2), .b(cero), .carry_in(carry_out_res_1), .add(add_res_2), .carry_out(carry_out_res_2));
+    adder_1bit res_b_3 (.a(not_b_in_3), .b(cero), .carry_in(carry_out_res_2), .add(add_res_3), .carry_out());
+
+    adder_1bit res_0 (.a(a_in_0), .b(add_res_0), .carry_in(cero), .add(add_res_10), .carry_out(carry_out_res_10));
+    adder_1bit res_1 (.a(a_in_1), .b(add_res_1), .carry_in(carry_out_res_10), .add(add_res_11), .carry_out(carry_out_res_11));
+    adder_1bit res_2 (.a(a_in_2), .b(add_res_2), .carry_in(carry_out_res_11), .add(add_res_12), .carry_out(carry_out_res_12));
+    adder_1bit res_3 (.a(a_in_3), .b(add_res_3), .carry_in(carry_out_res_12), .add(add_res_13), .carry_out(carry_out_d6));
+    
+    //------------------------- PIB (111) -------------------------
+    
+    
+    
+    
+    //---------------------------- MUX ----------------------------
+
+
+    mux8_1 alu_mux_0 (.d0(and0), .d1(or0), .d2(add_0), .d3(cero), .d4(cero), .d5(cero), .d6(add_res_10), .d7(b_in_0), .sel_0(alu_op_0), .sel_1(alu_op_1), .sel_2(alu_op_2), .y(alu_result_0));
+    mux8_1 alu_mux_1 (.d0(and1), .d1(or1), .d2(add_1), .d3(cero), .d4(cero), .d5(cero), .d6(add_res_11), .d7(b_in_1), .sel_0(alu_op_0), .sel_1(alu_op_1), .sel_2(alu_op_2), .y(alu_result_1));
+    mux8_1 alu_mux_2 (.d0(and2), .d1(or2), .d2(add_2), .d3(cero), .d4(cero), .d5(cero), .d6(add_res_12), .d7(b_in_2), .sel_0(alu_op_0), .sel_1(alu_op_1), .sel_2(alu_op_2), .y(alu_result_2));
+    mux8_1 alu_mux_3 (.d0(and3), .d1(or3), .d2(add_3), .d3(cero), .d4(cero), .d5(cero), .d6(add_res_13), .d7(b_in_3), .sel_0(alu_op_0), .sel_1(alu_op_1), .sel_2(alu_op_2), .y(alu_result_3));
+
+    //--------------------------- FLAGS ---------------------------
+
+    mux8_1 cflag_mux (.d0(cero), .d1(cero), .d2(carry_out_3), .d3(cero), .d4(cero), .d5(cero), .d6(carry_out_d6), .d7(cero), .sel_0(alu_op_0), .sel_1(alu_op_1), .sel_2(alu_op_2), .y(carry_flag));
+
+    //--------------------------- ZeroFLAG ---------------------------
+    logic or_0_1, or_2_3, or_xx;
+
+    or_gate u_or_01 (.a(alu_result_0), .b(alu_result_1), .y(or_0_1));
+    or_gate u_or_23 (.a(alu_result_2), .b(alu_result_3), .y(or_2_3));
+
+    or_gate u_or_xx (.a(or_0_1), .b(or_2_3), .y(or_xx));
+
+    not_gate u_not_0 (.a(or_xx), .y(zero_flag));
+    
+    
 endmodule
