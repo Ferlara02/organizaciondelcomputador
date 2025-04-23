@@ -34,14 +34,14 @@ module adder_1bit(
     and_gate a8 (.a(t4), .b(notc), .y(t4_and)); // ¬a*b*¬c
 
     // Suma de los términos
-    logic or1, or2, or3;
+    logic or1, or2;
 
     or_gate o1 (.a(t1_and), .b(t2_and), .y(or1));
     or_gate o2 (.a(t3_and), .b(t4_and), .y(or2));
     or_gate o3 (.a(or1), .b(or2), .y(add));
 
     // carry_out = a*b + a*carry_in + b*carry_in
-    logic ab, ac, bc, or4, or5;
+    logic ab, ac, bc, or4;
     and_gate c1 (.a(a), .b(b), .y(ab));
     and_gate c2 (.a(a), .b(carry_in), .y(ac));
     and_gate c3 (.a(b), .b(carry_in), .y(bc));
